@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Geräte Übersicht</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .add-button {
+            display: block;
+            width: 200px;
+            margin: 20px auto;
+            padding: 10px;
+            background-color: #28a745;
+            color: #fff;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .add-button:hover {
+            background-color: #218838;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f8f9fa;
+        }
+        .available {
+            color: green;
+            font-weight: bold;
+        }
+        .unavailable {
+            color: red;
+            font-weight: bold;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .action-buttons input[type="text"] {
+            flex: 1;
+            padding: 5px;
+        }
+        .action-buttons button {
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .action-buttons button:hover {
+            background-color: #0056b3;
+        }
+        .action-buttons .return-button {
+            background-color: #dc3545;
+        }
+        .action-buttons .return-button:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Geräte Liste</h1>
+        <a class="add-button" th:href="@{/geraete/add}"><i class="fas fa-plus"></i> Neues Gerät hinzufügen</a>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Produkt</th>
+                    <th>Typ</th>
+                    <th>Status</th>
+                    <th>Aktionen</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="geraet : ${geraete}">
+                    <td th:text="${geraet.id}"></td>
+                    <td th:text="${geraet.produkt}"></td>
+                    <td th:text="${geraet.typ}"></td>
+                    <td>
+                        <span th:if="${geraet.status}" class="available">✔ Verfügbar</span>
+                        <span th:unless="${geraet.status}" class="unavailable">
+                            ❌ Ausgeliehen von: <span th:text="${ausleiheMap[geraet.id]}"></span>
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <form th:if="${geraet.status}" th:action="@{/ausleihe/ausleihen/{id}(id=${geraet.id})}" method="post">
+                                <input type="text" name="name" placeholder="Name eingeben" required>
+                                <button type="submit"><i class="fas fa-hand-holding"></i> Ausleihen</button>
+                            </form>
+                            <form th:unless="${geraet.status}" th:action="@{/ausleihe/zurueckgeben/{id}(id=${geraet.id})}" method="post">
+                                <button type="submit" class="return-button"><i class="fas fa-undo"></i> Zurückgeben</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
