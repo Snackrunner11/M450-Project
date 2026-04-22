@@ -9,18 +9,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class) // Aktiviert Mockito (ohne Spring!)
+@ExtendWith(MockitoExtension.class)
 public class GeraeteAusleiheControllerTest {
 
     @Mock
@@ -29,56 +26,99 @@ public class GeraeteAusleiheControllerTest {
     @Mock
     private GeraeteAusgelihenRepository ausleiheRepository;
 
-    @InjectMocks // Erstellt den Controller und injiziert die oben gemockten Repositories
+    @InjectMocks
     private GeraeteAusleiheController controller;
 
     private Gereate testGeraet;
+    private GeraeteAusleihe testAusleihe;
 
     @BeforeEach
     void setUp() {
         testGeraet = new Gereate();
         testGeraet.setId(1L);
-        testGeraet.setStatus(true); // Gerät ist am Anfang verfügbar
+        testGeraet.setStatus(true);
+
+        testAusleihe = new GeraeteAusleihe();
+        testAusleihe.setId(1L);
+        testAusleihe.setGeraet(testGeraet);
+        testAusleihe.setEntleiherName("Max");
     }
 
+    // --- Tests für das AUSLEIHEN ---
+
     @Test
-    public void testAusleihen_Success() {
-        // Arrange (Vorbereitung)
-        String entleiherName = "Anna Muster";
-        Mockito.when(geraeteRepository.findById(1L)).thenReturn(Optional.of(testGeraet));
-        Mockito.when(ausleiheRepository.findByGeraetId(1L)).thenReturn(Optional.empty()); // Noch nicht ausgeliehen
+    public void testAusleihen_Erfolgreich() {
+        when(geraeteRepository.findById(1L)).thenReturn(Optional.of(testGeraet));
+        when(ausleiheRepository.findByGeraetId(1L)).thenReturn(Optional.empty());
 
-        // Act (Ausführung)
-        String viewName = controller.ausleihen(1L, entleiherName);
+        String view = controller.ausleihen(1L, "Anna");
 
-        // Assert (Überprüfung)
-        assertEquals("redirect:/geraete/view", viewName); // Korrekte Weiterleitung
-        assertFalse(testGeraet.getStatus()); // Status muss auf 'false' gewechselt sein
-
-        // Prüfen, ob die save-Methoden der Repositories aufgerufen wurden
+        assertEquals("redirect:/geraete/view", view);
+        assertFalse(testGeraet.getStatus());
         verify(ausleiheRepository).save(any(GeraeteAusleihe.class));
         verify(geraeteRepository).save(testGeraet);
     }
 
     @Test
-    public void testZurueckgeben_Success() {
-        // Arrange (Vorbereitung)
-        testGeraet.setStatus(false); // Gerät ist aktuell ausgeliehen
-        GeraeteAusleihe ausleihe = new GeraeteAusleihe();
-        ausleihe.setGeraet(testGeraet);
+    public void testAusleihen_GeraetExistiertNicht() {
+        when(geraeteRepository.findById(99L)).thenReturn(Optional.empty()); 
 
-        Mockito.when(ausleiheRepository.findByGeraetId(1L)).thenReturn(Optional.of(ausleihe));
-        Mockito.when(geraeteRepository.findById(1L)).thenReturn(Optional.of(testGeraet));
+        String view = controller.ausleihen(99L, "Anna");
 
-        // Act (Ausführung)
-        String viewName = controller.zurueckgeben(1L);
+        assertEquals("redirect:/geraete/view", view);
+        // FIX: Dem Compiler den genauen Typ sagen
+        verify(ausleiheRepository, never()).save(any(GeraeteAusleihe.class)); 
+    }
 
-        // Assert (Überprüfung)
-        assertEquals("redirect:/geraete/view", viewName); // Korrekte Weiterleitung
-        assertTrue(testGeraet.getStatus()); // Status muss wieder auf 'true' (verfügbar) sein
+    @Test
+    public void testAusleihen_BereitsAusgeliehen() {
+        when(geraeteRepository.findById(1L)).thenReturn(Optional.of(testGeraet));
+        when(ausleiheRepository.findByGeraetId(1L)).thenReturn(Optional.of(testAusleihe)); 
 
-        // Prüfen, ob der Eintrag gelöscht und das Gerät aktualisiert wurde
-        verify(ausleiheRepository).delete(ausleihe);
+        String view = controller.ausleihen(1L, "Anna");
+
+        assertEquals("redirect:/geraete/view", view);
+        // FIX: Dem Compiler den genauen Typ sagen
+        verify(ausleiheRepository, never()).save(any(GeraeteAusleihe.class)); 
+    }
+
+    // --- Tests für das ZURÜCKGEBEN ---
+
+    @Test
+    public void testZurueckgeben_Erfolgreich() {
+        testGeraet.setStatus(false);
+        when(ausleiheRepository.findByGeraetId(1L)).thenReturn(Optional.of(testAusleihe));
+        when(geraeteRepository.findById(1L)).thenReturn(Optional.of(testGeraet));
+
+        String view = controller.zurueckgeben(1L);
+
+        assertEquals("redirect:/geraete/view", view);
+        assertTrue(testGeraet.getStatus());
+        verify(ausleiheRepository).delete(testAusleihe);
         verify(geraeteRepository).save(testGeraet);
+    }
+
+    @Test
+    public void testZurueckgeben_AusleiheExistiertNicht() {
+        when(ausleiheRepository.findByGeraetId(1L)).thenReturn(Optional.empty());
+
+        String view = controller.zurueckgeben(1L);
+
+        assertEquals("redirect:/geraete/view", view);
+        // FIX: Dem Compiler den genauen Typ sagen
+        verify(ausleiheRepository, never()).delete(any(GeraeteAusleihe.class)); 
+    }
+
+    @Test
+    public void testZurueckgeben_GeraetWurdeInZwischenzeitGeloescht() {
+        when(ausleiheRepository.findByGeraetId(1L)).thenReturn(Optional.of(testAusleihe));
+        when(geraeteRepository.findById(1L)).thenReturn(Optional.empty()); 
+
+        String view = controller.zurueckgeben(1L);
+
+        assertEquals("redirect:/geraete/view", view);
+        verify(ausleiheRepository).delete(testAusleihe); 
+        // FIX: Dem Compiler den genauen Typ sagen
+        verify(geraeteRepository, never()).save(any(Gereate.class)); 
     }
 }
