@@ -66,7 +66,6 @@ public class GeraeteAusleiheControllerTest {
         String view = controller.ausleihen(99L, "Anna");
 
         assertEquals("redirect:/geraete/view", view);
-        // FIX: Dem Compiler den genauen Typ sagen
         verify(ausleiheRepository, never()).save(any(GeraeteAusleihe.class)); 
     }
 
@@ -78,7 +77,6 @@ public class GeraeteAusleiheControllerTest {
         String view = controller.ausleihen(1L, "Anna");
 
         assertEquals("redirect:/geraete/view", view);
-        // FIX: Dem Compiler den genauen Typ sagen
         verify(ausleiheRepository, never()).save(any(GeraeteAusleihe.class)); 
     }
 
@@ -105,7 +103,6 @@ public class GeraeteAusleiheControllerTest {
         String view = controller.zurueckgeben(1L);
 
         assertEquals("redirect:/geraete/view", view);
-        // FIX: Dem Compiler den genauen Typ sagen
         verify(ausleiheRepository, never()).delete(any(GeraeteAusleihe.class)); 
     }
 
@@ -118,7 +115,6 @@ public class GeraeteAusleiheControllerTest {
 
         assertEquals("redirect:/geraete/view", view);
         verify(ausleiheRepository).delete(testAusleihe); 
-        // FIX: Dem Compiler den genauen Typ sagen
         verify(geraeteRepository, never()).save(any(Gereate.class)); 
     }
 }

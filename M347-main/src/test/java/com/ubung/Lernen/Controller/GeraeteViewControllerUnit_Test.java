@@ -29,7 +29,7 @@ public class GeraeteViewControllerUnit_Test {
     @Mock
     private GeraeteAusgelihenRepository ausleiheRepository;
 
-    @Mock // Wir mocken das Spring UI-Model, da wir keinen echten Web-Kontext haben
+    @Mock // das Spring UI-Model mocken, da keine echter Web-Kontext existiert
     private Model model;
 
     @InjectMocks
