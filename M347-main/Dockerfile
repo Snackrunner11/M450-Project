@@ -1,6 +1,5 @@
 #define base image
-FROM openjdk:21-jdk
-WORKDIR /app
+FROM eclipse-temurin:21-jdk
 #copy the jar file to the container
 COPY target/Lernen-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8080
