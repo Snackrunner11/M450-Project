@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerät bearbeiten</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 50px; }
+        .container { width: 400px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        form { display: flex; flex-direction: column; gap: 10px; }
+        button { background-color: #ffc107; border: none; padding: 10px; cursor: pointer; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Gerät bearbeiten</h1>
+        <form th:action="@{/geraete/update/{id}(id=${geraet.id})}" th:object="${geraet}" method="post">
+            
+            <label for="produktEingabe">Produkt:</label>
+            <input type="text" id="produktEingabe" th:field="*{produkt}" required />
+            
+            <label for="typEingabe">Typ:</label>
+            <input type="text" id="typEingabe" th:field="*{typ}" required />
+            
+            <div>
+                <input type="checkbox" id="statusEingabe" th:field="*{status}" />
+                <label for="statusEingabe">Verfügbar</label>
+            </div>
+            
+            <button type="submit">Speichern</button>
+        </form>
+        <br>
+        <a th:href="@{/geraete/view}">Abbrechen</a>
+    </div>
+</body>
+</html>

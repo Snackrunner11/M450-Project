@@ -1,91 +1,30 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Geräte Übersicht</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            width: 80%;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            margin-top: 20px;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        .add-button {
-            display: block;
-            width: 200px;
-            margin: 20px auto;
-            padding: 10px;
-            background-color: #28a745;
-            color: #fff;
-            text-align: center;
-            text-decoration: none;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        }
-        .add-button:hover {
-            background-color: #218838;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: left;
-        }
-        th {
-            background-color: #f8f9fa;
-        }
-        .available {
-            color: green;
-            font-weight: bold;
-        }
-        .unavailable {
-            color: red;
-            font-weight: bold;
-        }
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-        }
-        .action-buttons input[type="text"] {
-            flex: 1;
-            padding: 5px;
-        }
-        .action-buttons button {
-            padding: 5px 10px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        .action-buttons button:hover {
-            background-color: #0056b3;
-        }
-        .action-buttons .return-button {
-            background-color: #dc3545;
-        }
-        .action-buttons .return-button:hover {
-            background-color: #c82333;
-        }
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 0; }
+        .container { width: 90%; margin: 20px auto; padding: 20px; background-color: #fff; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #333; }
+        .add-button { display: block; width: 200px; margin: 20px auto; padding: 10px; background-color: #28a745; color: #fff; text-align: center; text-decoration: none; border-radius: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        .available { color: green; font-weight: bold; }
+        .unavailable { color: red; font-weight: bold; }
+        
+        /* Alte Styles für die Action Buttons (Ausleihen/Zurückgeben) */
+        .action-buttons { display: flex; gap: 10px; }
+        .action-buttons input[type="text"] { flex: 1; padding: 5px; }
+        .action-buttons button { padding: 5px 10px; background-color: #007bff; color: #fff; border: none; border-radius: 3px; cursor: pointer; }
+        .return-btn-style { background-color: #dc3545 !important; color: white !important; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;}
+        
+        /* Neue Styles für Bearbeiten und Löschen */
+        .mgmt-buttons { display: flex; gap: 10px; }
+        .edit-button { padding: 5px 10px; background-color: #ffc107; color: #000; text-decoration: none; border-radius: 3px; }
+        .delete-button { padding: 5px 10px; background-color: #343a40; color: #fff; text-decoration: none; border-radius: 3px; }
     </style>
 </head>
 <body>
@@ -99,7 +38,8 @@
                     <th>Produkt</th>
                     <th>Typ</th>
                     <th>Status</th>
-                    <th>Aktionen</th>
+                    <th>Ausleihe</th>
+                    <th>Verwaltung</th>
                 </tr>
             </thead>
             <tbody>
@@ -120,8 +60,15 @@
                                 <button type="submit"><i class="fas fa-hand-holding"></i> Ausleihen</button>
                             </form>
                             <form th:unless="${geraet.status}" th:action="@{/ausleihe/zurueckgeben/{id}(id=${geraet.id})}" method="post">
-                                <button type="submit" class="return-button"><i class="fas fa-undo"></i> Zurückgeben</button>
+                                <button type="submit" class="return-btn-style"><i class="fas fa-undo"></i> Zurückgeben</button>
                             </form>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="mgmt-buttons">
+                            <a class="edit-button" th:href="@{/geraete/edit/{id}(id=${geraet.id})}"><i class="fas fa-edit"></i> Bearbeiten</a>
+                            <a class="delete-button" th:href="@{/geraete/delete/{id}(id=${geraet.id})}" 
+                               onclick="return confirm('Möchtest du dieses Gerät wirklich löschen?');"><i class="fas fa-trash"></i> Löschen</a>
                         </div>
                     </td>
                 </tr>
